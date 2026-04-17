@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "stdio.h"
+#include "stdlib.h"
 
-#define MAXSIZE 666
 #define OK 1
 #define ERROR 0
 #define TRUE 1
@@ -10,6 +9,7 @@
 typedef int Status;
 typedef int SElemType;
 
+/* ==================== 链栈结构（现代清晰写法） ==================== */
 typedef struct StackNode {
 	SElemType data;
 	struct StackNode *next;
@@ -20,12 +20,15 @@ typedef struct {
 	int count;          // 栈中元素个数
 } LinkStack;
 
+
+/* 访问元素 */
 Status visit(SElemType c)
 {
 	printf("%d ", c);
 	return OK;
 }
 
+/* 构造一个空栈 S */
 Status InitStack(LinkStack *S)
 {
 	S->top = NULL;
@@ -33,11 +36,13 @@ Status InitStack(LinkStack *S)
 	return OK;
 }
 
-Status ClearStack(LinkStack* S)
+/* 清空栈（释放所有节点） */
+Status ClearStack(LinkStack *S)
 {
 	StackNode *p, *q;
 	p = S->top;
-	while(p != NULL)
+	
+	while (p != NULL)
 	{
 		q = p;
 		p = p->next;
@@ -49,59 +54,70 @@ Status ClearStack(LinkStack* S)
 	return OK;
 }
 
+/* 判断栈是否为空 */
 Status StackEmpty(LinkStack S)
 {
-	return S.count == 0 ? TRUE : FALSE;
+	return (S.count == 0) ? TRUE : FALSE;
 }
 
+/* 返回栈的长度 */
 int StackLength(LinkStack S)
 {
 	return S.count;
 }
 
+/* 获取栈顶元素 */
 Status GetTop(LinkStack S, SElemType *e)
 {
-	if(S.top == NULL)
+	if (S.top == NULL)
 		return ERROR;
+	
 	*e = S.top->data;
 	return OK;
 }
 
-Status Push(LinkStack* S, SElemType e)
+/* 入栈 */
+Status Push(LinkStack *S, SElemType e)
 {
-	StackNode* p = (StackNode*)malloc(sizeof(StackNode));
-	if (p == NULL)
-		return ERROR;
-	p->next = S->top;
-	p->data = e;
-	S->top = p;
+	StackNode *s = (StackNode *)malloc(sizeof(StackNode));
+	if (s == NULL)
+		return ERROR;               // 内存分配失败
+	
+	s->data = e;
+	s->next = S->top;
+	S->top = s;
 	S->count++;
 	return OK;
 }
 
-Status Pop(LinkStack* S, SElemType* e)
+/* 出栈 */
+Status Pop(LinkStack *S, SElemType *e)
 {
-	if (e == NULL)
+	if (S->top == NULL)             // 也可以用 StackEmpty(*S)
 		return ERROR;
-	StackNode* p = S->top;
+	
+	StackNode *p = S->top;
 	*e = p->data;
 	S->top = p->next;
-	S->count--;
 	free(p);
+	S->count--;
 	return OK;
 }
 
+/* 遍历栈（从栈顶到栈底） */
 Status StackTraverse(LinkStack S)
 {
-	StackNode* p = S.top;
-	while(p != NULL)
+	StackNode *p = S.top;
+	while (p != NULL)
 	{
 		visit(p->data);
-		p = p->next;	
+		p = p->next;
 	}
+	printf("\n");
 	return OK;
 }
 
+/* 主函数测试 */
 int main()
 {
 	LinkStack s;
