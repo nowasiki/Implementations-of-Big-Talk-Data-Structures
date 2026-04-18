@@ -66,7 +66,7 @@ int Calculate(char c, int e1, int e2)
 }
 
 // 后缀表达式（逆波兰表达式）求值核心函数
-Status EvalPostfix(char* arr)
+int EvalPostfix(char* arr)
 {
 	Stack S;
 	// 初始化栈
@@ -74,33 +74,38 @@ Status EvalPostfix(char* arr)
 	int i = 0;
 	// 用于拼接多位数（如 10、123）
 	int num = 0;
+	int hasNum = 0;   // 标记是否有正在拼接的数字
 	
 	// 遍历整个表达式字符串
+	// 针对当前的字符进行判断
+	// 运算符 or 空格 -> 如果非0，将前面的数字入栈
 	while (arr[i] != '\0')
 	{
 		// 如果是数字，拼接成完整数值
 		if (arr[i] >= '0' && arr[i] <= '9')
 		{
+			hasNum = 1;
 			num = 10 * num + arr[i] - '0';
 		}
 		// 如果是空格，表示一个数字结束
 		else if (arr[i] == ' ')
 		{
-			if (num != 0)
+			if (hasNum)
 			{
-				// 将拼接好的数字入栈
 				Push(&S, num);
 				num = 0;
+				hasNum = 0;
 			}
 		}
 		// 如果是运算符
 		else
 		{
-			if (num != 0)
+			// 可能运算符和前面的数字之间没有空格 这样也能把前面的数字Push进去
+			if (hasNum)
 			{
-				// 先把前面的数字入栈
 				Push(&S, num);
 				num = 0;
+				hasNum = 0;
 			}
 			
 			// 识别四则运算符
@@ -121,7 +126,8 @@ Status EvalPostfix(char* arr)
 	}
 	
 	// 处理表达式最后一个数字
-	if (num != 0) Push(&S, num);
+	// 理论上讲最后一个不可能是数字，但是可能会有错误的输入，防止崩溃
+	if (hasNum) Push(&S, num);
 	
 	// 最终栈中只剩一个元素：计算结果
 	int result;
@@ -129,12 +135,25 @@ Status EvalPostfix(char* arr)
 	return result;
 }
 
-// 测试主函数
 int main()
-{
-	// 后缀表达式示例：9 3 1 - 3 * + 10 2 / +
-	// 对应中缀：9 + (3-1)*3 + 10/2 = 20
-	char arr[100] = "9 3 1 - 3 * + 10 2 / +";
+{	
+	// 测试1：基础用例（你原来的）→ 20
+	// char arr[100] = "9 3 1 - 3 * + 10 2 / +";
+	
+	// 测试2：0 作为减数 → 3-0=3
+	 char arr[100] = "3 0 -";
+	
+	// 测试3：0 作为加数 → 0+5=5
+	// char arr[100] = "0 5 +";
+	
+	// 测试4：多个0混合运算 → 2*(0+5)=10
+	// char arr[100] = "2 0 5 + *";
+	
+	// 测试5：0 除以非零 → 0/7=0
+	// char arr[100] = "0 7 /";
+	
+	// 测试6：被除数是0，除数多位数 → 0/10=0
+	// char arr[100] = "0 10 /";
 	
 	printf("计算结果：%d\n", EvalPostfix(arr));
 	return 0;
